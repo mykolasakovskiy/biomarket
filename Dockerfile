@@ -15,5 +15,6 @@ COPY . .
 # Collect static on build (optional); won't fail if DEBUG=1
 RUN python manage.py collectstatic --noinput || true
 
-CMD ["sh", "-c", "gunicorn biomarket.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]
+CMD ["sh","-c","python manage.py migrate --noinput && gunicorn biomarket.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]
+
 
