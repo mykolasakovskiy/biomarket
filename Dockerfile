@@ -1,20 +1,33 @@
+# Dockerfile (Render-friendly)
+
 FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Python env
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
 WORKDIR /app
 
-# System deps
-RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
+# System deps (для psycopg2 та компіляції C-розширень)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+  && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
+# Python deps
+COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
+# App
 COPY . .
 
-# Collect static on build (optional); won't fail if DEBUG=1
-RUN python manage.py collectstatic --noinput || true
+# Збирання статичних файлів (не впаде, якщо DEBUG=1)
+RUN mkdir -p /app/staticfiles && python manage.py collectstatic --noinput || true
 
-CMD ["sh","-c","python manage.py migrate --noinput && gunicorn biomarket.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]
+# (не обовʼязково для Render, але не шкодить)
+EXPOSE 8000
 
-
+# 1) Міграції на старті
+# 2) Запуск gunicorn. Якщо Render не передасть PORT, візьмемо 8000.
+CMD ["sh","-c","python manage.py migrate --noinput && gunicorn biomarket.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3 --threads 2 --timeout 120"]
