@@ -30,4 +30,5 @@ EXPOSE 8000
 
 # 1) Міграції на старті
 # 2) Запуск gunicorn. Якщо Render не передасть PORT, візьмемо 8000.
-CMD ["sh","-c","python manage.py migrate --noinput && gunicorn biomarket.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3 --threads 2 --timeout 120"]
+CMD ["sh","-c","python manage.py makemigrations --noinput && python manage.py migrate --noinput && gunicorn biomarket.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]
+
