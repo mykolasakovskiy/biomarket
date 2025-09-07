@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h4">Кошик</h1>
+{% if items %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead><tr><th>Товар</th><th>К-сть</th><th>Разом</th><th></th></tr></thead>
+      <tbody>
+        {% for row in items %}
+          <tr>
+            <td>
+              <a href="{{ row.product.get_absolute_url }}">{{ row.product.title }}</a><br>
+              <span class="text-muted">{{ row.product.price }} {{ currency }} / шт.</span>
+            </td>
+            <td>{{ row.qty }}</td>
+            <td><strong>{{ row.line_total }} {{ currency }}</strong></td>
+            <td><a class="btn btn-sm btn-outline-danger" href="{% url 'shop:cart_remove' row.product.id %}">Видалити</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="d-flex justify-content-between align-items-center">
+    <strong class="fs-5">Сума: {{ total }} {{ currency }}</strong>
+    <a class="btn btn-primary" href="{% url 'shop:checkout' %}">Оформити замовлення</a>
+  </div>
+{% else %}
+  <div class="alert alert-info">Кошик порожній.</div>
+{% endif %}
+{% endblock %}

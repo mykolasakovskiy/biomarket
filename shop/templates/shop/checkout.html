@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h4">Оформлення замовлення</h1>
+<form method="post" class="row g-3">
+  {% csrf_token %}
+  <div class="col-md-6">{{ form.full_name.label_tag }} {{ form.full_name }}</div>
+  <div class="col-md-6">{{ form.email.label_tag }} {{ form.email }}</div>
+  <div class="col-md-6">{{ form.phone.label_tag }} {{ form.phone }}</div>
+  <div class="col-12">{{ form.address.label_tag }} {{ form.address }}</div>
+  <div class="col-md-6">{{ form.city.label_tag }} {{ form.city }}</div>
+  <div class="col-md-6">{{ form.postal_code.label_tag }} {{ form.postal_code }}</div>
+  <div class="col-12">{{ form.notes.label_tag }} {{ form.notes }}</div>
+  <div class="col-12 d-flex justify-content-between align-items-center">
+    <a class="btn btn-outline-secondary" href="{% url 'shop:cart' %}">Назад</a>
+    <button class="btn btn-success">Перейти до оплати</button>
+  </div>
+</form>
+<div class="mt-3 text-muted small">
+  *Порада: без налаштованого Stripe у <code>.env</code> замовлення одразу відмічається як оплачене (для тесту).
+</div>
+{% endblock %}

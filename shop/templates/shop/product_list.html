@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row mb-3 align-items-center">
+  <div class="col-md-8">
+    <h1 class="h3 mb-0">Біо продукція</h1>
+    <p class="text-muted">Натурально. Смачно. Корисно.</p>
+  </div>
+  <div class="col-md-4">
+    <form class="d-flex" method="get">
+      <input class="form-control me-2" type="search" name="q" value="{{ request.GET.q }}" placeholder="Пошук...">
+      <button class="btn btn-outline-primary" type="submit">Шукати</button>
+    </form>
+  </div>
+</div>
+
+<div class="mb-3">
+  <div class="btn-group" role="group">
+    <a href="/" class="btn btn-sm {% if not active_category %}btn-primary{% else %}btn-outline-primary{% endif %}">Усе</a>
+    {% for c in categories %}
+      <a href="{{ c.get_absolute_url }}" class="btn btn-sm {% if active_category == c.slug %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ c.name }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="row g-4">
+  {% for p in products %}
+  <div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="card h-100">
+      {% with img=p.images.first %}
+        {% if img %}<img src="{{ img.image_url }}" class="card-img-top" alt="{{ p.title }}">{% endif %}
+      {% endwith %}
+      <div class="card-body d-flex flex-column">
+        <h2 class="h6 card-title"><a href="{{ p.get_absolute_url }}" class="text-decoration-none">{{ p.title }}</a></h2>
+        <div class="mt-auto d-flex justify-content-between align-items-center">
+          <strong>{{ p.price }} {{ currency }}</strong>
+          <a href="{% url 'shop:cart_add' p.id %}" class="btn btn-sm btn-success">Додати</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="alert alert-info">Поки що немає товарів.</div></div>
+  {% endfor %}
+</div>
+
+{% if is_paginated %}
+<nav class="mt-4" aria-label="Пагінація">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Назад</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Стор. {{ page_obj.number }} із {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Далі</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

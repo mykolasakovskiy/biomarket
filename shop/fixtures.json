@@ -1,0 +1,39 @@
+[
+  {
+    "model": "shop.category",
+    "pk": 1,
+    "fields": {
+      "name": "Мед",
+      "slug": "med"
+    }
+  },
+  {
+    "model": "shop.category",
+    "pk": 2,
+    "fields": {
+      "name": "Сири",
+      "slug": "siry"
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 1,
+    "fields": {
+      "category": 1,
+      "title": "Мед липовий 500г",
+      "slug": "med-lypovyi-500",
+      "description": "Ароматний натуральний мед з липи.",
+      "price": "220.00",
+      "stock": 50,
+      "is_active": true
+    }
+  },
+  {
+    "model": "shop.productimage",
+    "pk": 1,
+    "fields": {
+      "product": 1,
+      "image_url": "https://images.unsplash.com/photo-1514996937319-344454492b37?q=80&w=1200&auto=format&fit=crop"
+    }
+  }
+]
