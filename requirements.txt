@@ -1,11 +1,19 @@
+# Core
 Django>=5.0,<6.0
-Pillow>=10.0
-stripe>=7.0
-python-dotenv>=1.0
-# Optional (for Postgres in production):
-psycopg2-binary>=2.9
-# Optional (forms niceties)
-django-crispy-forms>=2.1
-
 gunicorn>=21.2
 whitenoise>=6.6
+
+# DB & config
+dj-database-url>=2.1
+python-dotenv>=1.0
+# If you use Postgres in production (Render/Heroku)
+psycopg2-binary>=2.9
+
+# Images
+Pillow>=10.0
+
+# Payments (optional for your project)
+stripe>=7.0
+
+# Forms (optional niceties)
+django-crispy-forms>=2.1

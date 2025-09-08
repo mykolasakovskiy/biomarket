@@ -2,20 +2,14 @@ services:
   - type: web
     name: biomarket
     env: python
-    plan: free
     buildCommand: |
       pip install -r requirements.txt
-      python manage.py migrate
       python manage.py collectstatic --noinput
-    startCommand: gunicorn biomarket.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: gunicorn biomarket.wsgi:application --preload
+    preDeployCommand: |
+      python manage.py migrate --noinput
     envVars:
-      - key: DJANGO_SECRET_KEY
-        generateValue: true
-      - key: DEBUG
-        value: "0"
-      - key: ALLOWED_HOSTS
-        value: "biomarket.onrender.com"
-      - key: CURRENCY
-        value: "UAH"
-      - key: CSRF_TRUSTED_ORIGINS
-        value: "https://biomarket.onrender.com"
+      - key: DJANGO_SETTINGS_MODULE
+        value: biomarket.settings
+      - key: PYTHON_VERSION
+        value: 3.12.11

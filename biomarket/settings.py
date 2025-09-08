@@ -1,47 +1,39 @@
-# biomarket/settings.py
 from pathlib import Path
 import os
-from dotenv import load_dotenv
+import dj_database_url
 
-# ──────────────────────────────────────────────────────────────────────────────
-# БАЗОВЕ
-# ──────────────────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent.parent
-# Для локалки читаємо .env (на Render .env зазвичай немає — значення беруться з UI)
-load_dotenv(BASE_DIR / ".env")
 
-# Безпечний парсинг DEBUG: "1/true/yes" => True
-DEBUG = os.getenv("DEBUG", "0").lower() in ("1", "true", "yes")
+# --- Security & basics ---
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+DEBUG = os.getenv("DEBUG", "0") == "1"
 
-# SECRET_KEY: обов'язково задайте в продакшені через змінні оточення
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key-change-me")
+# Comma-separated hosts in env; default allows Render + local
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", ".onrender.com,localhost,127.0.0.1").split(",") if h.strip()]
 
-# ALLOWED_HOSTS: з env через кому; обрізаємо пробіли й ігноруємо порожні
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
-if DEBUG and not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["*"]
+# If deploying to Render, trust its hostname for CSRF
+RENDER_HOST = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+CSRF_TRUSTED_ORIGINS = [f"https://{RENDER_HOST}"] if RENDER_HOST else []
+# You may also add your custom domain:
+# CSRF_TRUSTED_ORIGINS += ["https://yourdomain.com"]
 
-# Якщо Render задає ім'я хоста окремо — додамо (не обов'язково, але зручно)
-RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME")
-if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
-# ──────────────────────────────────────────────────────────────────────────────
-# ДОДАТКИ
-# ──────────────────────────────────────────────────────────────────────────────
+# --- Apps ---
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
+    # Third‑party
+    "crispy_forms",
+    # Local
     "shop",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # WhiteNoise — віддавання статичних файлів у продакшені
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -72,87 +64,50 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "biomarket.wsgi.application"
 
-# ──────────────────────────────────────────────────────────────────────────────
-# БАЗА ДАНИХ
-# SQLite для розробки; Postgres вмикаємо через USE_POSTGRES=1
-# ──────────────────────────────────────────────────────────────────────────────
-if os.getenv("USE_POSTGRES", "0") == "1":
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("POSTGRES_DB", "biomarket"),
-            "USER": os.getenv("POSTGRES_USER", "postgres"),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
-            "HOST": os.getenv("POSTGRES_HOST", "localhost"),
-            "PORT": os.getenv("POSTGRES_PORT", "5432"),
-            "CONN_MAX_AGE": 60,  # тримати конекшени відкритими
-        }
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+# --- Database (DATABASE_URL or fallback to sqlite) ---
+DATABASES = {
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        ssl_require=False,
+    )
+}
 
-# ──────────────────────────────────────────────────────────────────────────────
-# МОВА / ЧАС
-# ──────────────────────────────────────────────────────────────────────────────
-LANGUAGE_CODE = "uk"
-TIME_ZONE = os.getenv("TZ", "Europe/Kyiv")
+# --- Password validation ---
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# --- I18N ---
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# ──────────────────────────────────────────────────────────────────────────────
-# СТАТИЧНІ ТА МЕДІА
-# ──────────────────────────────────────────────────────────────────────────────
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]  # для розробки (якщо є папка static/)
-STATIC_ROOT = BASE_DIR / "staticfiles"    # куди collectstatic складає файли на проді
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# --- Static & media ---
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]  # your project-level static (e.g., static/shop)
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# WhiteNoise: compressed + manifest storage
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    }
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ──────────────────────────────────────────────────────────────────────────────
-# БЕЗПЕКА / PROXY
-# ──────────────────────────────────────────────────────────────────────────────
-# Дозволяє Django коректно визначати HTTPS за проксі (Render)
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-# Куки лише по https у продакшені
-SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = not DEBUG
+# Crispy Forms (if you install a bootstrap pack, change template pack accordingly)
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
-# CSRF Trusted Origins з env (через кому, повні схеми: https://…)
-CSRF_TRUSTED_ORIGINS = [
-    u.strip() for u in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if u.strip()
-]
-if RENDER_EXTERNAL_HOSTNAME:
-    origin = f"https://{RENDER_EXTERNAL_HOSTNAME}"
-    if origin not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append(origin)
-
-# ──────────────────────────────────────────────────────────────────────────────
-# ПЛАТЕЖІ / КОШИК / ВАЛЮТА
-# ──────────────────────────────────────────────────────────────────────────────
-STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY", "")
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-
+# Cart & currency
 CART_SESSION_ID = "cart"
-CURRENCY = os.getenv("CURRENCY", "UAH")
-
-# ──────────────────────────────────────────────────────────────────────────────
-# ЛОГУВАННЯ (щоб 500 помилки було видно в Render Logs)
-# ──────────────────────────────────────────────────────────────────────────────
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "root": {"handlers": ["console"], "level": "WARNING"},
-    "loggers": {
-        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
-    },
-}
+CURRENCY = "UAH"
+STRIPE_CURRENCY = "uah"
