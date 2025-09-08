@@ -1,18 +1,19 @@
 from django.urls import path
-from . import views
+from .views import ProductListView, ProductDetailView  # підлаштуй, якщо імена інші
+from . import views  # якщо є функціональні в’юшки (наприклад, cart)
 
 app_name = "shop"
+
 urlpatterns = [
-    path('', views.ProductListView.as_view(), name='home'),
-    path('category/<slug:slug>/', views.ProductListView.as_view(), name='category'),
-    path('product/<slug:slug>/', views.ProductDetailView.as_view(), name='product'),
+    # головна: список товарів
+    path("", ProductListView.as_view(), name="product_list"),
 
-    path('cart/', views.cart_view, name='cart'),
-    path('cart/add/<int:product_id>/', views.cart_add, name='cart_add'),
-    path('cart/remove/<int:product_id>/', views.cart_remove, name='cart_remove'),
+    # фільтр за категорією (якщо використовуєш)
+    path("category/<slug:slug>/", ProductListView.as_view(), name="category"),
 
-    path('checkout/', views.checkout, name='checkout'),
-    path('payment/stripe/create/', views.stripe_create_checkout, name='stripe_create_checkout'),
-    path('payment/stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
-    path('order/success/', views.order_success, name='order_success'),
+    # детальна сторінка товару (підлаштуй під свою в’юшку/шлях)
+    path("product/<slug:slug>/", ProductDetailView.as_view(), name="product_detail"),
+
+    # кошик (якщо є; інакше тимчасово прибери кнопку у base.html)
+    path("cart/", views.cart, name="cart"),
 ]
