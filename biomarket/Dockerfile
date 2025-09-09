@@ -1,22 +1,26 @@
 FROM python:3.12-slim
 
-# Базові налаштування Python
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# System deps for psycopg2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Встановлення залежностей
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Код
 COPY . .
 
-# Django settings
-ENV DJANGO_SETTINGS_MODULE=biomarket.settings
+ENV DJANGO_SETTINGS_MODULE=biomarket.settings \
+    PORT=8000
 
-# Збирання статики (не впаде, якщо її мало)
+# Collect static at build (safe even if nothing)
 RUN python manage.py collectstatic --noinput || true
 
-# Міграції та автосід (тільки якщо БД порожня), потім gunicorn на $PORT
-CMD sh -c "python manage.py migrate --noinput && python manage.py seed_shop --if-empty && gunicorn biomarket.wsgi:application --bind 0.0.0.0:${PORT:-8000} --preload"
+# Start script runs migrations then gunicorn
+RUN chmod +x start.sh
+CMD ["./start.sh"]

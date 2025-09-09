@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: biomarket
+    env: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+      # If you add a Render PostgreSQL, this will be auto-populated as DATABASE_URL
+files:
+  - path: Dockerfile
+    source: Dockerfile

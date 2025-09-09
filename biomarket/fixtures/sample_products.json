@@ -1,0 +1,22 @@
+[
+  {
+    "model": "shop.product",
+    "pk": 1,
+    "fields": {
+      "name": "Organic Apples",
+      "price": "2.99",
+      "description": "Fresh and crispy.",
+      "image_url": ""
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 2,
+    "fields": {
+      "name": "Free-range Eggs",
+      "price": "3.49",
+      "description": "A dozen eggs.",
+      "image_url": ""
+    }
+  }
+]
