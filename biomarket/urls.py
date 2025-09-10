@@ -1,22 +1,9 @@
-from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('shop.urls', namespace='shop')),
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
 # biomarket/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse, HttpResponseForbidden
 from django.conf import settings
+from django.conf.urls.static import static
 from django.core.management import call_command
 
 def seed_demo(request):
@@ -30,7 +17,7 @@ def seed_demo(request):
     try:
         call_command("loaddata", "biomarket/fixtures/sample_products.json", verbosity=0)
         return HttpResponse("✅ Loaded fixture sample_products.json")
-    except Exception as e:
+    except Exception:
         # 2) fallback: створити кілька демо-товарів у коді
         try:
             from shop.models import Product, Category
@@ -71,5 +58,9 @@ def seed_demo(request):
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include(("shop.urls", "shop"), namespace="shop")),
-    path("seed/", seed_demo),  # ⬅️ одноразовий ендпойнт
+    path("seed/", seed_demo),  # одноразовий ендпойнт
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
