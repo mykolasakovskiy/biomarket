@@ -87,7 +87,8 @@
                    Якщо є маршрут у кошик:   <a href="{% url 'shop:cart_add' p.id %}" class="btn btn-sm btn-primary">У кошик</a>
                    Щоб шаблон не ламався без цих урлів, лишаємо "пасивну" кнопку:
                 #}
-                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Детальніше</button>
+                <a href="{% url 'shop:product_detail' p.slug %}" class="btn btn-sm btn-outline-secondary">Детальніше</a>
+<a href="{% url 'shop:cart_add' p.id %}" class="btn btn-sm btn-primary">У кошик</a>
               </div>
             </div>
           </div>
