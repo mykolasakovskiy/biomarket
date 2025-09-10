@@ -1,26 +1,135 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
-  <h1 class="mb-3">Products</h1>
+
+<div class="container py-3">
+
+  <!-- Заголовок -->
+  <header class="mb-3">
+    <h1 class="mb-1">Біо продукція</h1>
+    <p class="text-muted m-0">Натурально. Смачно. Корисно.</p>
+  </header>
+
+  <!-- Панель фільтрів і пошуку -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+
+    {# Кнопки категорій (передайте у контексті: categories = [{name, slug, count?}, ...]) #}
+    {% if categories %}
+      <div class="d-flex flex-wrap gap-2">
+        {% with curcat=request.GET.category %}
+          <a href="?" class="btn btn-outline-primary btn-sm {% if not curcat %}active{% endif %}">Усе</a>
+          {% for c in categories %}
+            <a href="?category={{ c.slug }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}"
+               class="btn btn-outline-primary btn-sm {% if curcat == c.slug %}active{% endif %}">
+              {{ c.name }}{% if c.count %} ({{ c.count }}){% endif %}
+            </a>
+          {% endfor %}
+        {% endwith %}
+      </div>
+    {% endif %}
+
+    {# Пошук #}
+    <form method="get" class="d-flex align-items-center gap-2 ms-md-auto" role="search">
+      {% if request.GET.category %}
+        <input type="hidden" name="category" value="{{ request.GET.category }}">
+      {% endif %}
+      <input type="search"
+             class="form-control"
+             name="q"
+             value="{{ request.GET.q }}"
+             placeholder="Пошук…">
+      <button class="btn btn-primary" type="submit">Шукати</button>
+    </form>
+  </div>
+
   {% if products %}
-    <div class="row row-cols-1 row-cols-md-3 g-3">
+    <!-- Сітка товарів -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
       {% for p in products %}
         <div class="col">
-          <div class="card h-100">
-            {% if p.image_url %}
-              <img src="{{ p.image_url }}" class="card-img-top" alt="{{ p.name }}">
-            {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ p.name }}</h5>
-              <p class="card-text text-muted">{{ p.description|default:"No description" }}</p>
+          <div class="card h-100 shadow-sm">
+            <!-- Зображення (image або image_url або плейсхолдер) -->
+            <div class="ratio ratio-4x3 bg-light">
+              {% if p.image %}
+                <img src="{{ p.image.url }}" class="card-img-top object-fit-cover" alt="{{ p.name }}">
+              {% elif p.image_url %}
+                <img src="{{ p.image_url }}" class="card-img-top object-fit-cover" alt="{{ p.name }}">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center text-muted fw-medium">
+                  <span style="font-size:1.1rem">🛒 {{ p.category.name|default:"Товар" }}</span>
+                </div>
+              {% endif %}
             </div>
-            <div class="card-footer">
-              <strong>${{ p.price }}</strong>
+
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-1">
+                <h5 class="card-title mb-0">{{ p.name }}</h5>
+                {% if p.available or p.in_stock %}
+                  <span class="badge text-bg-success">В наявності</span>
+                {% else %}
+                  <span class="badge text-bg-secondary">Немає</span>
+                {% endif %}
+              </div>
+
+              {% if p.category %}
+                <div class="small text-muted mb-2">{{ p.category.name }}</div>
+              {% endif %}
+
+              <p class="card-text text-muted small mb-3">
+                {{ p.description|default:"" }}
+              </p>
+
+              <div class="mt-auto d-flex justify-content-between align-items-center">
+                <strong>{{ p.price|floatformat:"-2" }} UAH</strong>
+
+                {# Кнопки дій: за потреби підставте свої URL-и
+                   Напр., якщо є маршрут деталі: <a href="{% url 'shop:product_detail' p.slug %}" class="btn btn-sm btn-outline-secondary">Детальніше</a>
+                   Якщо є маршрут у кошик:   <a href="{% url 'shop:cart_add' p.id %}" class="btn btn-sm btn-primary">У кошик</a>
+                   Щоб шаблон не ламався без цих урлів, лишаємо "пасивну" кнопку:
+                #}
+                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Детальніше</button>
+              </div>
             </div>
           </div>
         </div>
       {% endfor %}
     </div>
+
+    <!-- Пагінація -->
+    {% if is_paginated %}
+      <nav class="mt-4" aria-label="Навігація сторінками">
+        <ul class="pagination justify-content-center">
+          <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+            <a class="page-link"
+               href="?{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}"
+               tabindex="-1">Попередня</a>
+          </li>
+
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+              <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+            {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="?{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="?{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">Наступна</a>
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+
   {% else %}
-    <div class="alert alert-info">No products yet. Log in to admin to add some.</div>
+    <div class="alert alert-info">
+      Поки що немає товарів.
+      <a class="alert-link" href="/admin/">Зайдіть в адмінку</a> і додайте перші позиції.
+    </div>
   {% endif %}
+
+</div>
 {% endblock %}
