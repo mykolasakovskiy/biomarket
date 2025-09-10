@@ -24,4 +24,11 @@ PY
 fi
 
 echo "Starting Gunicorn..."
-exec gunicorn biomarket.wsgi:application --bind 0.0.0.0:${PORT:-8000} --preload
+# Render задає $PORT на контейнері
+exec gunicorn biomarket.wsgi:application \
+  --bind 0.0.0.0:${PORT:-8000} \
+  --workers 2 \
+  --threads 2 \
+  --timeout 60 \
+  --access-logfile - \
+  --error-logfile -
