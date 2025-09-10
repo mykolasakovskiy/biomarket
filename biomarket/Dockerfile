@@ -15,8 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV DJANGO_SETTINGS_MODULE=biomarket.settings \
-    PORT=8000
+ENV DJANGO_SETTINGS_MODULE=biomarket.settings
 
 # Collect static at build (safe even if nothing)
 RUN python manage.py collectstatic --noinput || true
