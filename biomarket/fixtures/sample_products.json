@@ -1,22 +1,48 @@
 [
   {
+    "model": "shop.category",
+    "pk": 1,
+    "fields": {"name": "Фрукти", "slug": "frukty"}
+  },
+  {
+    "model": "shop.category",
+    "pk": 2,
+    "fields": {"name": "Овочі", "slug": "ovochi"}
+  },
+  {
     "model": "shop.product",
     "pk": 1,
     "fields": {
-      "name": "Organic Apples",
-      "price": "2.99",
-      "description": "Fresh and crispy.",
-      "image_url": ""
+      "name": "Яблука органічні",
+      "slug": "yabluka-organichni",
+      "description": "Свіжі, хрумкі, солодкі.",
+      "price": "55.00",
+      "available": true,
+      "category": 1
     }
   },
   {
     "model": "shop.product",
     "pk": 2,
     "fields": {
-      "name": "Free-range Eggs",
-      "price": "3.49",
-      "description": "A dozen eggs.",
-      "image_url": ""
+      "name": "Груші фермерські",
+      "slug": "hrushi-fermerski",
+      "description": "Ароматні й соковиті.",
+      "price": "68.00",
+      "available": true,
+      "category": 1
+    }
+  },
+  {
+    "model": "shop.product",
+    "pk": 3,
+    "fields": {
+      "name": "Морква",
+      "slug": "morkva",
+      "description": "Солодка молода морква.",
+      "price": "29.00",
+      "available": true,
+      "category": 2
     }
   }
 ]
