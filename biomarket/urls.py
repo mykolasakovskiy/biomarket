@@ -41,7 +41,7 @@ def seed_demo(request):
                 obj, was_created = Product.objects.get_or_create(
                     slug=slug,
                     defaults={
-                        "name": name,
+                        "title": name,
                         "description": desc,
                         "price": price,
                         "category": cat,
