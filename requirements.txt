@@ -17,3 +17,5 @@ stripe>=7.0
 
 # Forms (optional niceties)
 django-crispy-forms>=2.1
+# Slug transliteration
+Unidecode>=1.3
