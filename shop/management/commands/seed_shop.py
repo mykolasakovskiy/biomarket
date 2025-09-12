@@ -55,9 +55,9 @@ class Command(BaseCommand):
 
         for block in data:
             cat_name = block["category"]
-            cat_slug = slugify(unidecode(cat_name))
+            slug = slugify(unidecode(cat_name))
             cat, _ = Category.objects.get_or_create(
-                slug=cat_slug,
+                 slug=slug,
                 defaults={"name": cat_name}
             )
 
