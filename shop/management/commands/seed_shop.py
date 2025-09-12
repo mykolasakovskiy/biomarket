@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 from decimal import Decimal
+from unidecode import unidecode
 
 class Command(BaseCommand):
     help = "Seed demo categories/products. Use --force to reseed, --if-empty to seed only when empty."
@@ -53,9 +54,9 @@ class Command(BaseCommand):
 
         for block in data:
             cat_name = block["category"]
-            cat, _ = Category.objects.get_or_create(name=cat_name, defaults={"slug": slugify(cat_name)})
+            cat, _ = Category.objects.get_or_create(name=cat_name, defaults={"slug": slugify(unidecode(cat_name))})
             for title, desc, price, img in block["items"]:
-                slug = slugify(title)
+                slug = slugify(unidecode(title))
                 p, created = Product.objects.get_or_create(
                     slug=slug,
                     defaults={
