@@ -46,8 +46,8 @@ class ProductListView(ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         # Категорії з лічильником товарів
-        ctx["categories"] = Category.objects.annotate(count=Count("product")).order_by("name")
-        ctx["current_category_slug"] = self.kwargs.get("slug") or self.request.GET.get("category")
+        ctx["categories"] = Category.objects.annotate(count=Count("products")).order_by("name")
+        ctx["active_category"] = self.kwargs.get("slug") or self.request.GET.get("category")
         ctx["search_query"] = self.request.GET.get("q", "")
         ctx["currency"] = getattr(settings, "CURRENCY", "UAH")
         return ctx
