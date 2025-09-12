@@ -12,10 +12,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         from shop.models import Category, Product, ProductImage
-        if opts["if_empty"]:
-            if Product.objects.exists():
-                self.stdout.write(self.style.WARNING("Products already exist; skipping (--if-empty)."))
-                return
+
+        if opts["if_empty"] and Product.objects.exists():
+            self.stdout.write(self.style.WARNING("Products already exist; skipping (--if-empty)."))
+            return
+
         if opts["force"]:
             self.stdout.write("Clearing old data...")
             ProductImage.objects.all().delete()
@@ -54,7 +55,12 @@ class Command(BaseCommand):
 
         for block in data:
             cat_name = block["category"]
-            cat, _ = Category.objects.get_or_create(name=cat_name, defaults={"slug": slugify(unidecode(cat_name))})
+            cat_slug = slugify(unidecode(cat_name))
+            cat, _ = Category.objects.get_or_create(
+                slug=cat_slug,
+                defaults={"name": cat_name}
+            )
+
             for title, desc, price, img in block["items"]:
                 slug = slugify(unidecode(title))
                 p, created = Product.objects.get_or_create(
@@ -71,3 +77,4 @@ class Command(BaseCommand):
                     ProductImage.objects.create(product=p, image_url=img)
 
         self.stdout.write(self.style.SUCCESS("Seeding complete."))
+
