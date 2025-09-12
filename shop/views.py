@@ -39,9 +39,9 @@ class ProductListView(ListView):
         if q:
             q = q.strip()
             if q:
-                qs = qs.filter(Q(name__icontains=q) | Q(description__icontains=q))
+                                qs = qs.filter(Q(title__icontains=q))
 
-        return qs.order_by("name")
+        return qs.order_by("title")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
