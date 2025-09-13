@@ -144,12 +144,12 @@ def checkout(request):
 
                 line_items = []
                 for it in order.items.all():
-                    # Використовуємо назву товару з моделі Product.name
+                    # Використовуємо назву товару з моделі Product.title
                     line_items.append(
                         {
                             "price_data": {
                                 "currency": currency,
-                                "product_data": {"name": it.product.name},
+                                "product_data": {"name": it.product.title},
                                 "unit_amount": int(it.price * 100),  # копійки
                             },
                             "quantity": it.quantity,
