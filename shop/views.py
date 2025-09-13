@@ -70,21 +70,24 @@ def cart_view(request):
     items = []
     total = Decimal("0.00")
 
+    product_ids = [int(pid) for pid in cart.keys()]
+    products = {str(p.id): p for p in Product.objects.filter(id__in=product_ids)}
+
     for pid, item in cart.items():
+        product = products.get(pid)
+        if not product:
+            continue
         price = Decimal(item["price"])
         qty = int(item["qty"])
-        subtotal = price * qty
+        line_total = price * qty
         items.append(
             {
-                "id": int(pid),
-                "name": item.get("title") or item.get("name"),  # підтримка обох ключів
-                "price": price,
+                "product": product,
                 "qty": qty,
-                "slug": item.get("slug"),
-                "subtotal": subtotal,
+                "line_total": line_total,
             }
         )
-        total += subtotal
+        total += line_total
 
     return render(
         request,
