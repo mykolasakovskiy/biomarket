@@ -13,7 +13,7 @@
     "model": "shop.product",
     "pk": 1,
     "fields": {
-      "name": "Яблука органічні",
+      "title": "Яблука органічні",
       "slug": "yabluka-organichni",
       "description": "Свіжі, хрумкі, солодкі.",
       "price": "55.00",
@@ -25,7 +25,7 @@
     "model": "shop.product",
     "pk": 2,
     "fields": {
-      "name": "Груші фермерські",
+      "title": "Груші фермерські",
       "slug": "hrushi-fermerski",
       "description": "Ароматні й соковиті.",
       "price": "68.00",
@@ -37,7 +37,7 @@
     "model": "shop.product",
     "pk": 3,
     "fields": {
-      "name": "Морква",
+      "title": "Морква",
       "slug": "morkva",
       "description": "Солодка молода морква.",
       "price": "29.00",
