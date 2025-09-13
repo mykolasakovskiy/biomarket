@@ -82,8 +82,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # --- I18N ---
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+LANGUAGE_CODE = "uk"
+TIME_ZONE = "Europe/Kyiv"
 USE_I18N = True
 USE_TZ = True
 
