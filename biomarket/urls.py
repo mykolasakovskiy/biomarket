@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.conf import settings
 from django.conf.urls.static import static
 from django.core.management import call_command
+from pathlib import Path
 
 def seed_demo(request):
     # простий захист токеном: ?token=YOUR_TOKEN
@@ -15,7 +16,8 @@ def seed_demo(request):
 
     # 1) спробувати завантажити фікстуру, якщо є
     try:
-        call_command("loaddata", "biomarket/fixtures/sample_products.json", verbosity=0)
+        fixture_path = Path(settings.BASE_DIR) / "fixtures" / "sample_products.json"
+        call_command("loaddata", fixture_path, verbosity=0)
         return HttpResponse("✅ Loaded fixture sample_products.json")
     except Exception:
         # 2) fallback: створити кілька демо-товарів у коді
