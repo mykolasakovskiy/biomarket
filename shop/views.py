@@ -70,13 +70,8 @@ def cart_view(request):
     items = []
     total = Decimal("0.00")
 
-    product_ids = [int(pid) for pid in cart.keys()]
-    products = {str(p.id): p for p in Product.objects.filter(id__in=product_ids)}
-
     for pid, item in cart.items():
-        product = products.get(pid)
-        if not product:
-            continue
+        product = Product.objects.get(id=int(pid))
         price = Decimal(item["price"])
         qty = int(item["qty"])
         line_total = price * qty
