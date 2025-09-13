@@ -39,7 +39,7 @@ class ProductListView(ListView):
         if q:
             q = q.strip()
             if q:
-                                qs = qs.filter(Q(title__icontains=q))
+                qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
 
         return qs.order_by("title")
 
