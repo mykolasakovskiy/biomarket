@@ -9,8 +9,10 @@ python -m venv .venv
 # macOS/Linux:
 source .venv/bin/activate
 
+cd biomarket
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py collectstatic
 python manage.py runserver
 ```
 
