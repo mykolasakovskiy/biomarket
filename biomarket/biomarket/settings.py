@@ -1,13 +1,14 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")            # читаємо змінні з .env
 
-# ⚠️ Replace in production (use env var)
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-me')
-DEBUG = True
-
-ALLOWED_HOSTS = ["*"]
+# Безпечний ключ з env (обов’язково визначити в .env)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-change-me")
+DEBUG = os.getenv("DEBUG", "0") == "1"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -17,13 +18,17 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    "products",
+    "django.contrib.humanize",  # корисні шаблонні фільтри
+    "products",                 # каталог товарів
+    "cart",                     # кошик (новий додаток)
+    "accounts",                 # реєстрація/профілі (новий додаток)
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",  # підтримка мов
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -52,15 +57,24 @@ TEMPLATES = [
 WSGI_APPLICATION = "biomarket.wsgi.application"
 ASGI_APPLICATION = "biomarket.asgi.application"
 
-DB_PATH = os.getenv("DJANGO_DB_PATH", BASE_DIR / "db.sqlite3")
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": DB_PATH,
+        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.getenv("DB_NAME", BASE_DIR / "db.sqlite3"),
+        "USER": os.getenv("DB_USER", ""),
+        "PASSWORD": os.getenv("DB_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", ""),
+        "PORT": os.getenv("DB_PORT", ""),
     }
 }
 
 LANGUAGE_CODE = "uk"
+LANGUAGES = [
+    ("uk", "Українська"),
+    ("en", "English"),
+]
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
 TIME_ZONE = "Europe/Kyiv"
 USE_I18N = True
 USE_TZ = True
@@ -69,5 +83,13 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Примітивне кешування (можна замінити на Redis/Memcached)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "biomarket-cache",
+    }
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
