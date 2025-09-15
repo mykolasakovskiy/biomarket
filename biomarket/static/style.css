@@ -1,23 +1,90 @@
-body{
-  font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
-  margin:0;
-  line-height:1.6;
+/* Color palette */
+:root {
+  --color-primary: #0d6efd;
+  --color-secondary: #6c757d;
+  --color-accent: #198754;
+  --color-light: #f8f9fa;
+  --color-dark: #212529;
 }
 
-.wrap{
-  max-width:860px;
-  margin:4rem auto;
-  padding:0 1rem;
+/* Base styles */
+body {
+  font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  margin: 0;
+  line-height: 1.6;
+  color: var(--color-dark);
+  background: var(--color-light);
 }
 
-h1{
-  margin:0 0 .5rem;
+.wrap {
+  max-width: 860px;
+  margin: 4rem auto;
+  padding: 0 1rem;
 }
 
-.card{
-  border:1px solid #eee;
-  border-radius:14px;
-  padding:1.25rem;
-  background:#fff;
+h1 {
+  margin: 0 0 0.5rem;
+}
+
+/* Header and navigation */
+header {
+  background: var(--color-primary);
+  color: var(--color-light);
+}
+
+header nav {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 1rem;
+}
+
+header nav a {
+  color: var(--color-light);
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+}
+
+header nav a:hover,
+header nav a:focus {
+  background: var(--color-accent);
+  color: var(--color-light);
+}
+
+/* Footer */
+footer {
+  background: var(--color-primary);
+  color: var(--color-light);
+  text-align: center;
+  padding: 1rem 0;
+  margin-top: 2rem;
+}
+
+/* Main layout */
+main.wrap {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Card */
+.card {
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 1.25rem;
+  background: #fff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .wrap {
+    margin: 2rem auto;
+  }
+
+  header nav {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
