@@ -12,9 +12,9 @@
     <header>
       <nav class="wrap">
         <a href="{% url 'home' %}">Головна</a>
-        <a href="/catalog/">Каталог</a>
-        <a href="/about/">Про нас</a>
-        <a href="/contacts/">Контакти</a>
+        <a href="{% url 'product_list' %}">Каталог</a>
+        <a href="{% url 'about' %}">Про нас</a>
+        <a href="{% url 'contacts' %}">Контакти</a>
       </nav>
     </header>
     <main class="wrap">
