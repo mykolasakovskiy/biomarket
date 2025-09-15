@@ -40,7 +40,7 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav mb-2 mb-lg-0 me-lg-3">
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'home' %}">Головна</a>
               </li>
@@ -54,6 +54,18 @@
                 <a class="nav-link" href="{% url 'contacts' %}">Контакти</a>
               </li>
             </ul>
+            <form class="d-flex ms-lg-auto mt-3 mt-lg-0" role="search" action="{% url 'product_list' %}" method="get">
+              <label class="visually-hidden" for="navbar-search">Пошук товарів</label>
+              <input
+                class="form-control me-2"
+                type="search"
+                name="q"
+                id="navbar-search"
+                placeholder="Пошук"
+                value="{{ request.GET.q|default_if_none:'' }}"
+              >
+              <button class="btn btn-outline-light" type="submit">Знайти</button>
+            </form>
           </div>
         </div>
       </nav>

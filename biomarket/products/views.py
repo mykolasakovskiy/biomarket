@@ -5,13 +5,26 @@ from .models import Product
 
 
 def product_list(request):
+    query = request.GET.get("q", "").strip()
+    sort = request.GET.get("sort", "").strip()
+
     products = Product.objects.all()
+
+    if query:
+        products = products.filter(name__icontains=query)
+
+    valid_sorts = {"price": "price", "name": "name"}
+    if sort in valid_sorts:
+        products = products.order_by(valid_sorts[sort])
+
     description = (
         "Каталог Biomarket: натуральні та органічні товари для здорового життя, "
         "доступні за вигідними цінами."
     )
     context = {
         "products": products,
+        "q": query,
+        "current_sort": sort if sort in {"price", "name"} else "",
         "meta_title": "Каталог товарів Biomarket",
         "description": description,
         "keywords": "Biomarket, каталог товарів, органічні продукти, еко продукти",
