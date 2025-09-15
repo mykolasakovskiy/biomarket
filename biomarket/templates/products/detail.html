@@ -9,4 +9,7 @@
   {% endif %}
   <p>{{ product.description }}</p>
   <p><strong>{{ product.price }} грн</strong></p>
+  <p class="{% if product.stock > 0 %}text-success{% else %}text-danger{% endif %}">
+    {% if product.stock > 0 %}в наявності{% else %}немає{% endif %}
+  </p>
 {% endblock %}
