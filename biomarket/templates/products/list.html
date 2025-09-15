@@ -4,6 +4,30 @@
 
 {% block content %}
   <h1>Список товарів</h1>
+  <form action="{% url 'product_list' %}" method="get" class="row g-2 align-items-end mb-4">
+    <div class="col-md-6">
+      <label class="form-label" for="product-search">Пошук</label>
+      <input
+        type="search"
+        name="q"
+        id="product-search"
+        class="form-control"
+        placeholder="Введіть назву товару"
+        value="{{ q }}"
+      >
+    </div>
+    <div class="col-md-3">
+      <label class="form-label" for="product-sort">Сортування</label>
+      <select name="sort" id="product-sort" class="form-select">
+        <option value="">Без сортування</option>
+        <option value="name" {% if current_sort == "name" %}selected{% endif %}>За назвою</option>
+        <option value="price" {% if current_sort == "price" %}selected{% endif %}>За ціною</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-primary w-100">Застосувати</button>
+    </div>
+  </form>
   <div class="row">
     {% for product in products %}
       <div class="col-md-4 mb-4">
