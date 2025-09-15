@@ -1,0 +1,28 @@
+{% load static %}
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Biomarket{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+  </head>
+  <body>
+    <header>
+      <nav class="wrap">
+        <a href="{% url 'home' %}">Головна</a>
+        <a href="/catalog/">Каталог</a>
+        <a href="/about/">Про нас</a>
+        <a href="/contacts/">Контакти</a>
+      </nav>
+    </header>
+    <main class="wrap">
+      {% block content %}{% endblock %}
+    </main>
+    <footer>
+      <div class="wrap">
+        <p>&copy; {% now 'Y' %} Biomarket</p>
+      </div>
+    </footer>
+  </body>
+</html>
