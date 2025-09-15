@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+  <h1>{{ product.name }}</h1>
+  {% if product.image %}
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid mb-3">
+  {% endif %}
+  <p>{{ product.description }}</p>
+  <p><strong>{{ product.price }} грн</strong></p>
+{% endblock %}
