@@ -11,6 +11,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to="products/", blank=True)
     slug = models.SlugField(unique=True)
+    stock = models.PositiveIntegerField(default=0)
 
     def _generate_unique_slug(self, base_slug: Optional[str] = None) -> str:
         slug = base_slug or slugify(self.name)
