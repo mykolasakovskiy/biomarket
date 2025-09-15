@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: biomarket
+    env: python
+    buildCommand: cd biomarket && pip install -r requirements.txt
+    startCommand: cd biomarket && python manage.py migrate && gunicorn biomarket.wsgi
+    envVars:
+      - key: DJANGO_DB_PATH
+        value: /var/data/db.sqlite3
+    disk:
+      name: data
+      mountPath: /var/data
