@@ -5,6 +5,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
 from products.models import Product
 
@@ -77,11 +78,12 @@ def _get_or_create_cart(request: HttpRequest) -> Cart:
     return cart
 
 
+@require_POST
 def add_to_cart(request: HttpRequest, slug: str) -> HttpResponse:
     """Add the selected product to the active cart and redirect back."""
 
     product = get_object_or_404(Product, slug=slug)
-    next_url = request.GET.get("next")
+    next_url = request.POST.get("next") or request.GET.get("next")
     next_url_is_safe = bool(
         next_url
         and url_has_allowed_host_and_scheme(
