@@ -34,6 +34,52 @@ class ProductModelTests(TestCase):
 
         self.assertEqual(second_product.slug, "duplicate-name-1")
 
+    def test_slug_generation_at_field_limit(self):
+        max_length = Product._meta.get_field("slug").max_length
+        self.assertIsNotNone(max_length)
+        assert max_length is not None
+        near_limit_name = "a" * max_length
+
+        product = Product.objects.create(
+            name=near_limit_name,
+            description="Name exactly at slug max length",
+            price=Decimal("7.50"),
+            stock=3,
+        )
+
+        self.assertEqual(product.slug, near_limit_name)
+        self.assertEqual(len(product.slug), max_length)
+
+    def test_slug_generation_truncates_above_field_limit(self):
+        max_length = Product._meta.get_field("slug").max_length
+        self.assertIsNotNone(max_length)
+        assert max_length is not None
+        long_name = "a" * (max_length + 10)
+
+        product = Product.objects.create(
+            name=long_name,
+            description="Name exceeds slug max length",
+            price=Decimal("8.00"),
+            stock=4,
+        )
+
+        expected_slug = "a" * max_length
+        self.assertEqual(product.slug, expected_slug)
+        self.assertEqual(len(product.slug), max_length)
+
+        second_product = Product.objects.create(
+            name=long_name,
+            description="Second product with long name",
+            price=Decimal("9.00"),
+            stock=4,
+        )
+
+        self.assertEqual(len(second_product.slug), max_length)
+        self.assertNotEqual(product.slug, second_product.slug)
+        suffix = "-1"
+        if max_length >= len(suffix):
+            self.assertTrue(second_product.slug.endswith(suffix))
+
 
 class ProductListViewTests(TestCase):
     def test_product_list_paginates_results(self):
