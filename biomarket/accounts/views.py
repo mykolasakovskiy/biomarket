@@ -14,10 +14,7 @@ def profile_overview(request: HttpRequest) -> HttpResponse:
     keywords = "Biomarket, профіль, обліковий запис"
 
     if request.user.is_authenticated:
-        try:
-            profile = UserProfile.objects.get(user=request.user)
-        except UserProfile.DoesNotExist as exc:
-            raise Http404("Profile not found") from exc
+        profile, _created = UserProfile.objects.get_or_create(user=request.user)
 
         username = profile.user.get_username()
         meta_title = f"Профіль {username} — Biomarket"
