@@ -2,7 +2,7 @@ services:
   - type: web
     name: biomarket
     env: python
-    buildCommand: cd biomarket && pip install -r requirements.txt
+    buildCommand: cd biomarket && pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: cd biomarket && python manage.py migrate && gunicorn biomarket.wsgi
     envVars:
       - key: DJANGO_DB_PATH
