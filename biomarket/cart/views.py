@@ -1,8 +1,10 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from products.models import Product
 
@@ -79,9 +81,19 @@ def add_to_cart(request: HttpRequest, slug: str) -> HttpResponse:
     """Add the selected product to the active cart and redirect back."""
 
     product = get_object_or_404(Product, slug=slug)
+    next_url = request.GET.get("next")
+    next_url_is_safe = bool(
+        next_url
+        and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts=settings.ALLOWED_HOSTS,
+        )
+    )
 
     if product.stock <= 0:
-        return redirect(request.GET.get("next") or product.get_absolute_url())
+        if next_url_is_safe:
+            return redirect(next_url)
+        return redirect(product.get_absolute_url())
 
     cart = _get_or_create_cart(request)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
@@ -90,5 +102,6 @@ def add_to_cart(request: HttpRequest, slug: str) -> HttpResponse:
         cart_item.quantity += 1
         cart_item.save(update_fields=["quantity"])
 
-    redirect_url = request.GET.get("next") or reverse("cart:home")
-    return redirect(redirect_url)
+    if next_url_is_safe:
+        return redirect(next_url)
+    return redirect(reverse("cart:home"))
