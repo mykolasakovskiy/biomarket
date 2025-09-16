@@ -32,7 +32,7 @@ class AddToCartViewTests(TestCase):
         self.assertEqual(cart.items.count(), 1)
 
     def test_add_to_cart_respects_next_parameter_from_post(self):
-        next_url = reverse("product_list")
+        next_url = reverse("products:product_list")
         response = self.client.post(
             reverse("cart:add", args=[self.product.slug]),
             data={"next": next_url},
