@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
@@ -44,3 +45,41 @@ class AddToCartViewTests(TestCase):
 
         self.assertEqual(cart.items.count(), 1)
         self.assertEqual(cart_item.quantity, 2)
+
+    def test_guest_cart_items_persist_after_login(self):
+        add_response = self.client.post(reverse("cart:add", args=[self.product.slug]))
+        self.assertEqual(add_response.status_code, 302)
+
+        user = get_user_model().objects.create_user(username="jane", password="test-pass")
+        self.client.force_login(user)
+
+        response = self.client.get(reverse("cart:home"))
+        self.assertEqual(response.status_code, 200)
+
+        user_cart = Cart.objects.get(user=user)
+        self.assertEqual(self.client.session["cart_id"], user_cart.pk)
+        self.assertEqual(Cart.objects.filter(user=user).count(), 1)
+
+        cart_item = user_cart.items.get(product=self.product)
+        self.assertEqual(cart_item.quantity, 1)
+        self.assertEqual(user_cart.items.count(), 1)
+
+    def test_cart_items_merge_quantities_on_login(self):
+        user = get_user_model().objects.create_user(username="john", password="secret")
+        user_cart = Cart.objects.create(user=user)
+        CartItem.objects.create(cart=user_cart, product=self.product, quantity=2)
+
+        add_response = self.client.post(reverse("cart:add", args=[self.product.slug]))
+        self.assertEqual(add_response.status_code, 302)
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("cart:home"))
+        self.assertEqual(response.status_code, 200)
+
+        user_cart.refresh_from_db()
+        self.assertEqual(self.client.session["cart_id"], user_cart.pk)
+
+        cart_item = user_cart.items.get(product=self.product)
+        self.assertEqual(cart_item.quantity, 3)
+        self.assertEqual(user_cart.items.count(), 1)
+        self.assertEqual(Cart.objects.filter(user=user).count(), 1)
