@@ -100,9 +100,16 @@ def add_to_cart(request: HttpRequest, slug: str) -> HttpResponse:
     cart = _get_or_create_cart(request)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
 
-    if not created:
-        cart_item.quantity += 1
+    if cart_item.quantity > product.stock:
+        cart_item.quantity = product.stock
         cart_item.save(update_fields=["quantity"])
+    elif not created:
+        if cart_item.quantity + 1 > product.stock:
+            # Quantity already at stock level; do not increase beyond available stock.
+            pass
+        else:
+            cart_item.quantity += 1
+            cart_item.save(update_fields=["quantity"])
 
     if next_url_is_safe:
         return redirect(next_url)
