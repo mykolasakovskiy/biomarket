@@ -1,5 +1,7 @@
+from decimal import Decimal
+
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from products.models import Product
@@ -8,8 +10,33 @@ from .models import Cart, CartItem
 
 
 def cart_home(request: HttpRequest) -> HttpResponse:
-    """Display a minimal placeholder cart page."""
-    return HttpResponse("Cart is empty", content_type="text/plain")
+    """Display cart contents using a template."""
+
+    cart = _get_or_create_cart(request)
+    cart_items = list(cart.items.select_related("product"))
+
+    cart_total = Decimal("0.00")
+    cart_quantity = 0
+
+    for item in cart_items:
+        line_total = item.product.price * item.quantity
+        cart_total += line_total
+        cart_quantity += item.quantity
+        setattr(item, "line_total", line_total)
+
+    context = {
+        "cart": cart,
+        "cart_items": cart_items,
+        "cart_total": cart_total,
+        "cart_quantity": cart_quantity,
+        "meta_title": "Кошик — Biomarket",
+        "description": "Перевірте вміст вашого кошика Biomarket та завершіть оформлення замовлення.",
+        "keywords": "Biomarket, кошик, замовлення, органічні продукти",
+        "og_type": "website",
+        "twitter_card": "summary",
+    }
+
+    return render(request, "cart/home.html", context)
 
 
 def _get_or_create_cart(request: HttpRequest) -> Cart:
