@@ -29,7 +29,7 @@
     </div>
   </form>
   <div class="row">
-    {% for product in products %}
+    {% for product in page_obj %}
       <div class="col-md-4 mb-4">
         <div class="card h-100">
           {% if product.image %}
@@ -55,4 +55,39 @@
       <p>Немає товарів.</p>
     {% endfor %}
   </div>
+  {% if page_obj.has_other_pages %}
+    <nav aria-label="Навігація по каталогу" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+          {% if page_obj.has_previous %}
+            <a class="page-link" href="?{% if preserved_query %}{{ preserved_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Попередня">
+              <span aria-hidden="true">&laquo;</span>
+              <span class="visually-hidden">Попередня</span>
+            </a>
+          {% else %}
+            <span class="page-link" aria-label="Попередня">
+              <span aria-hidden="true">&laquo;</span>
+              <span class="visually-hidden">Попередня</span>
+            </span>
+          {% endif %}
+        </li>
+        <li class="page-item disabled">
+          <span class="page-link">Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+          {% if page_obj.has_next %}
+            <a class="page-link" href="?{% if preserved_query %}{{ preserved_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="Наступна">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="visually-hidden">Наступна</span>
+            </a>
+          {% else %}
+            <span class="page-link" aria-label="Наступна">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="visually-hidden">Наступна</span>
+            </span>
+          {% endif %}
+        </li>
+      </ul>
+    </nav>
+  {% endif %}
 {% endblock %}
