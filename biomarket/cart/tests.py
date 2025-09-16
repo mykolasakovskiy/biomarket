@@ -1,12 +1,14 @@
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
 
 from products.models import Product
 
 from .models import Cart, CartItem
+from .views import STOCK_LIMIT_MESSAGE
 
 
 class AddToCartViewTests(TestCase):
@@ -46,6 +48,25 @@ class AddToCartViewTests(TestCase):
         self.assertEqual(cart.items.count(), 1)
         self.assertEqual(cart_item.quantity, 2)
 
+    def test_add_to_cart_caps_quantity_to_available_stock(self):
+        self.product.stock = 2
+        self.product.save(update_fields=["stock"])
+
+        self.client.post(reverse("cart:add", args=[self.product.slug]))
+        self.client.post(reverse("cart:add", args=[self.product.slug]))
+        response = self.client.post(reverse("cart:add", args=[self.product.slug]))
+
+        self.assertEqual(response.status_code, 302)
+
+        cart_id = self.client.session["cart_id"]
+        cart = Cart.objects.get(pk=cart_id)
+        cart_item = CartItem.objects.get(cart=cart, product=self.product)
+
+        self.assertEqual(cart_item.quantity, self.product.stock)
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertIn(STOCK_LIMIT_MESSAGE, [message.message for message in messages])
+
     def test_guest_cart_items_persist_after_login(self):
         add_response = self.client.post(reverse("cart:add", args=[self.product.slug]))
         self.assertEqual(add_response.status_code, 302)
@@ -83,3 +104,31 @@ class AddToCartViewTests(TestCase):
         self.assertEqual(cart_item.quantity, 3)
         self.assertEqual(user_cart.items.count(), 1)
         self.assertEqual(Cart.objects.filter(user=user).count(), 1)
+
+    def test_cart_merge_caps_quantity_to_stock(self):
+        self.product.stock = 2
+        self.product.save(update_fields=["stock"])
+
+        user = get_user_model().objects.create_user(username="max", password="safe-pass")
+        user_cart = Cart.objects.create(user=user)
+        CartItem.objects.create(cart=user_cart, product=self.product, quantity=1)
+
+        session_cart = Cart.objects.create()
+        CartItem.objects.create(cart=session_cart, product=self.product, quantity=5)
+
+        session = self.client.session
+        session["cart_id"] = session_cart.pk
+        session.save()
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("cart:home"))
+
+        self.assertEqual(response.status_code, 200)
+
+        user_cart.refresh_from_db()
+        cart_item = user_cart.items.get(product=self.product)
+
+        self.assertEqual(cart_item.quantity, self.product.stock)
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertIn(STOCK_LIMIT_MESSAGE, [message.message for message in messages])

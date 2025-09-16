@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -7,6 +8,11 @@ from django.urls import reverse
 from products.models import Product
 
 from .models import Cart, CartItem
+
+
+STOCK_LIMIT_MESSAGE = (
+    "На жаль, товару більше немає на складі. Додано максимально доступну кількість."
+)
 
 
 def cart_home(request: HttpRequest) -> HttpResponse:
@@ -53,15 +59,31 @@ def _get_or_create_cart(request: HttpRequest) -> Cart:
             and session_cart.pk != cart.pk
             and session_cart.user_id in (None, request.user.id)
         ):
-            for item in session_cart.items.all():
+            for item in session_cart.items.select_related("product"):
                 destination_item, created = CartItem.objects.get_or_create(
                     cart=cart,
                     product=item.product,
                     defaults={"quantity": item.quantity},
                 )
-                if not created:
-                    destination_item.quantity += item.quantity
-                    destination_item.save(update_fields=["quantity"])
+
+                product_stock = destination_item.product.stock
+
+                if created:
+                    capped_quantity = min(destination_item.quantity, product_stock)
+                    if capped_quantity != destination_item.quantity:
+                        destination_item.quantity = capped_quantity
+                        destination_item.save(update_fields=["quantity"])
+                        messages.info(request, STOCK_LIMIT_MESSAGE)
+                else:
+                    desired_quantity = destination_item.quantity + item.quantity
+                    capped_quantity = min(desired_quantity, product_stock)
+
+                    if capped_quantity != destination_item.quantity:
+                        destination_item.quantity = capped_quantity
+                        destination_item.save(update_fields=["quantity"])
+
+                    if capped_quantity < desired_quantity:
+                        messages.info(request, STOCK_LIMIT_MESSAGE)
 
             if session_cart.user_id is None:
                 session_cart.delete()
@@ -87,8 +109,15 @@ def add_to_cart(request: HttpRequest, slug: str) -> HttpResponse:
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
 
     if not created:
-        cart_item.quantity += 1
-        cart_item.save(update_fields=["quantity"])
+        desired_quantity = cart_item.quantity + 1
+        capped_quantity = min(desired_quantity, product.stock)
+
+        if capped_quantity != cart_item.quantity:
+            cart_item.quantity = capped_quantity
+            cart_item.save(update_fields=["quantity"])
+
+        if capped_quantity < desired_quantity:
+            messages.info(request, STOCK_LIMIT_MESSAGE)
 
     redirect_url = request.GET.get("next") or reverse("cart:home")
     return redirect(redirect_url)
