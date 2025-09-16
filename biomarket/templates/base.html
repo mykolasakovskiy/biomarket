@@ -48,7 +48,7 @@
                 <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Головна</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'product_list' %}">Каталог</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'products:product_list' %}">Каталог</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">Про нас</a>
@@ -57,7 +57,7 @@
                 <a class="nav-link {% if request.resolver_match.url_name == 'contacts' %}active{% endif %}" href="{% url 'contacts' %}">Контакти</a>
               </li>
             </ul>
-            <form class="d-flex ms-lg-auto mt-3 mt-lg-0" role="search" action="{% url 'product_list' %}" method="get">
+            <form class="d-flex ms-lg-auto mt-3 mt-lg-0" role="search" action="{% url 'products:product_list' %}" method="get">
               <label class="visually-hidden" for="navbar-search">Пошук товарів</label>
               <input
                 class="form-control me-2"
