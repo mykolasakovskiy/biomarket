@@ -88,7 +88,7 @@ def add_to_cart(request: HttpRequest, slug: str) -> HttpResponse:
         next_url
         and url_has_allowed_host_and_scheme(
             next_url,
-            allowed_hosts=settings.ALLOWED_HOSTS,
+            allowed_hosts=settings.ALLOWED_HOSTS or {request.get_host()},
         )
     )
 

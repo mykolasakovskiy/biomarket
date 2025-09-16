@@ -31,7 +31,7 @@ class AddToCartViewTests(TestCase):
         self.assertEqual(cart_item.quantity, 1)
         self.assertEqual(cart.items.count(), 1)
 
-    def test_add_to_cart_respects_next_parameter_from_post(self):
+    def test_add_to_cart_redirects_to_relative_next_url(self):
         next_url = reverse("product_list")
         response = self.client.post(
             reverse("cart:add", args=[self.product.slug]),
@@ -40,6 +40,20 @@ class AddToCartViewTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, next_url)
+
+    def test_add_to_cart_redirects_to_absolute_next_url_on_same_host(self):
+        host = "biomarket.test"
+        next_path = reverse("product_list")
+        absolute_next_url = f"http://{host}{next_path}"
+
+        response = self.client.post(
+            reverse("cart:add", args=[self.product.slug]),
+            data={"next": absolute_next_url},
+            HTTP_HOST=host,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, absolute_next_url)
 
     def test_add_to_cart_rejects_get_requests(self):
         response = self.client.get(reverse("cart:add", args=[self.product.slug]))
