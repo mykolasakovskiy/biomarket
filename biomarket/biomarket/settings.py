@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",  # корисні шаблонні фільтри
     "products",                 # каталог товарів
     "cart",                     # кошик (новий додаток)
-    "accounts",                 # реєстрація/профілі (новий додаток)
+    "accounts.apps.AccountsConfig",  # реєстрація/профілі (новий додаток)
 ]
 
 MIDDLEWARE = [
