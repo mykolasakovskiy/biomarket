@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.conf import settings
+from django.db import IntegrityError, transaction
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -56,18 +57,30 @@ def _get_or_create_cart(request: HttpRequest) -> Cart:
             and session_cart.pk != cart.pk
             and session_cart.user_id in (None, request.user.id)
         ):
-            for item in session_cart.items.all():
-                destination_item, created = CartItem.objects.get_or_create(
-                    cart=cart,
-                    product=item.product,
-                    defaults={"quantity": item.quantity},
-                )
-                if not created:
-                    destination_item.quantity += item.quantity
-                    destination_item.save(update_fields=["quantity"])
+            max_attempts = 3
+            for attempt in range(max_attempts):
+                try:
+                    with transaction.atomic():
+                        for item in session_cart.items.all():
+                            destination_item, created = CartItem.objects.get_or_create(
+                                cart=cart,
+                                product=item.product,
+                                defaults={"quantity": item.quantity},
+                            )
+                            if not created:
+                                destination_item.quantity += item.quantity
+                                destination_item.save(update_fields=["quantity"])
 
-            if session_cart.user_id is None:
-                session_cart.delete()
+                        if session_cart.user_id is None:
+                            session_cart.delete()
+                    break
+                except IntegrityError:
+                    if attempt == max_attempts - 1:
+                        raise
+                    try:
+                        session_cart.refresh_from_db()
+                    except Cart.DoesNotExist:
+                        break
     else:
         if session_cart is None or session_cart.user_id is not None:
             cart = Cart.objects.create()
