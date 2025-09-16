@@ -41,6 +41,18 @@ class AddToCartViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, next_url)
 
+    def test_add_to_cart_allows_absolute_next_url_for_current_host(self):
+        next_path = reverse("products:product_list")
+        next_url = f"http://testserver{next_path}"
+
+        response = self.client.post(
+            reverse("cart:add", args=[self.product.slug]),
+            data={"next": next_url},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, next_url)
+
     def test_add_to_cart_rejects_get_requests(self):
         response = self.client.get(reverse("cart:add", args=[self.product.slug]))
         self.assertEqual(response.status_code, 405)
