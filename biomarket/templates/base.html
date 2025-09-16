@@ -5,6 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{{ meta_title|default:"Biomarket" }}{% endblock %}</title>
+    <link rel="icon" href="{% static 'favicon.ico' %}">
+    <meta property="og:image" content="{% static 'images/preview.png' %}">
+    <meta name="twitter:image" content="{% static 'images/preview.png' %}">
     {% block meta %}
       {% with default_title="Biomarket" default_description="Biomarket — інтернет-магазин органічних продуктів та товарів для здорового способу життя." default_keywords="Biomarket, органічні продукти, здорова їжа, еко товари" %}
         <meta name="description" content="{{ description|default:default_description }}">
