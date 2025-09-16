@@ -17,13 +17,25 @@ class Product(models.Model):
         slug = base_slug or slugify(self.name)
         if not slug:
             slug = "product"
+        max_length = Product._meta.get_field("slug").max_length
+        if max_length:
+            slug = slug[:max_length]
         unique_slug = slug
         counter = 1
         queryset = Product.objects.all()
         if self.pk:
             queryset = queryset.exclude(pk=self.pk)
         while queryset.filter(slug=unique_slug).exists():
-            unique_slug = f"{slug}-{counter}"
+            suffix = f"-{counter}"
+            if max_length:
+                base_length = max_length - len(suffix)
+                if base_length <= 0:
+                    base_slug = ""
+                else:
+                    base_slug = slug[:base_length]
+                unique_slug = f"{base_slug}{suffix}"[:max_length]
+            else:
+                unique_slug = f"{slug}{suffix}"
             counter += 1
         return unique_slug
 
