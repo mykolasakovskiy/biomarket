@@ -31,6 +31,20 @@ class AddToCartViewTests(TestCase):
         self.assertEqual(cart_item.quantity, 1)
         self.assertEqual(cart.items.count(), 1)
 
+    def test_add_to_cart_respects_next_parameter_from_post(self):
+        next_url = reverse("product_list")
+        response = self.client.post(
+            reverse("cart:add", args=[self.product.slug]),
+            data={"next": next_url},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, next_url)
+
+    def test_add_to_cart_rejects_get_requests(self):
+        response = self.client.get(reverse("cart:add", args=[self.product.slug]))
+        self.assertEqual(response.status_code, 405)
+
     def test_add_to_cart_increments_quantity_for_existing_item(self):
         first_response = self.client.post(reverse("cart:add", args=[self.product.slug]))
         self.assertEqual(first_response.status_code, 302)
