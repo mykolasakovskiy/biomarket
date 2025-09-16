@@ -9,7 +9,7 @@ services:
         sync: false   # задайте значення у налаштуваннях Render
       - key: ALLOWED_HOSTS
         sync: false   # напр., example.com або список через кому
-      - key: DJANGO_DB_PATH
+      - key: DB_NAME
         value: /var/data/db.sqlite3
     disk:
       name: data
