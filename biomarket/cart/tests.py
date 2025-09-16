@@ -44,3 +44,9 @@ class AddToCartViewTests(TestCase):
 
         self.assertEqual(cart.items.count(), 1)
         self.assertEqual(cart_item.quantity, 2)
+
+    def test_add_to_cart_rejects_get_requests(self):
+        response = self.client.get(reverse("cart:add", args=[self.product.slug]))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertNotIn("cart_id", self.client.session)

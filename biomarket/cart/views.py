@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 
 from products.models import Product
 
@@ -61,13 +62,18 @@ def _get_or_create_cart(request: HttpRequest) -> Cart:
     return cart
 
 
+@require_POST
 def add_to_cart(request: HttpRequest, slug: str) -> HttpResponse:
     """Add the selected product to the active cart and redirect back."""
 
     product = get_object_or_404(Product, slug=slug)
 
     if product.stock <= 0:
-        return redirect(request.GET.get("next") or product.get_absolute_url())
+        return redirect(
+            request.POST.get("next")
+            or request.GET.get("next")
+            or product.get_absolute_url()
+        )
 
     cart = _get_or_create_cart(request)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
@@ -76,5 +82,9 @@ def add_to_cart(request: HttpRequest, slug: str) -> HttpResponse:
         cart_item.quantity += 1
         cart_item.save(update_fields=["quantity"])
 
-    redirect_url = request.GET.get("next") or reverse("cart:home")
+    redirect_url = (
+        request.POST.get("next")
+        or request.GET.get("next")
+        or reverse("cart:home")
+    )
     return redirect(redirect_url)
