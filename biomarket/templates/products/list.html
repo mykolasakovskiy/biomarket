@@ -31,23 +31,44 @@
   <div class="row">
     {% for product in page_obj %}
       <div class="col-md-4 mb-4">
-        <div class="card h-100">
-          {% if product.image %}
-            <a href="{% url 'product_detail' product.slug %}">
-              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-            </a>
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">
+        <div class="card h-100 d-flex flex-column">
+          <div class="card-img-top-wrapper mb-3">
+            {% if product.image %}
+              <a href="{% url 'product_detail' product.slug %}" class="card-img-link">
+                <img
+                  src="{{ product.image.url }}"
+                  class="card-img-top"
+                  alt="{{ product.name }}"
+                  loading="lazy"
+                >
+              </a>
+            {% else %}
+              <span class="card-img-top-placeholder">Без зображення</span>
+            {% endif %}
+          </div>
+          <div class="card-body d-flex flex-column gap-2 p-0">
+            <h5 class="card-title mb-0">
               <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
             </h5>
-            <p class="card-text">{{ product.description }}</p>
+            <p class="card-text text-muted mb-0">{{ product.description|default_if_none:''|truncatechars:100 }}</p>
           </div>
-          <div class="card-footer d-flex justify-content-between align-items-center">
-            <strong>{{ product.price }} грн</strong>
-            <span class="{% if product.stock > 0 %}text-success{% else %}text-danger{% endif %}">
-              {% if product.stock > 0 %}в наявності{% else %}немає{% endif %}
-            </span>
+          <div class="card-footer bg-transparent border-0 pt-0 mt-auto">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <strong>{{ product.price }} грн</strong>
+              <span class="{% if product.stock > 0 %}text-success{% else %}text-danger{% endif %}">
+                {% if product.stock > 0 %}в наявності{% else %}немає{% endif %}
+              </span>
+            </div>
+            {% if product.stock > 0 %}
+              <a
+                href="{% url 'cart:add' product.slug %}?next={{ request.get_full_path|urlencode }}"
+                class="btn btn-outline-primary w-100"
+              >
+                Додати в кошик
+              </a>
+            {% else %}
+              <span class="btn btn-outline-secondary w-100 disabled" aria-disabled="true">Немає в наявності</span>
+            {% endif %}
           </div>
         </div>
       </div>
