@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ meta_title|default:"Профіль — Biomarket" }}{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4 p-md-5">
+            <h1 class="h3 mb-4">Мій профіль</h1>
+            {% if profile %}
+              <p class="text-muted">Ви увійшли як <strong>{{ profile.user.get_username }}</strong>.</p>
+              <dl class="row gy-3 mb-0">
+                <dt class="col-sm-4 text-muted">Електронна пошта</dt>
+                <dd class="col-sm-8">{{ profile.user.email|default:"Не вказано" }}</dd>
+                <dt class="col-sm-4 text-muted">Телефон</dt>
+                <dd class="col-sm-8">{{ profile.phone|default:"Не вказано" }}</dd>
+                <dt class="col-sm-4 text-muted">Адреса</dt>
+                <dd class="col-sm-8">
+                  {% if profile.address %}
+                    {{ profile.address|linebreaksbr }}
+                  {% else %}
+                    Не вказано
+                  {% endif %}
+                </dd>
+                <dt class="col-sm-4 text-muted">Профіль створено</dt>
+                <dd class="col-sm-8">{{ profile.created_at|date:"d.m.Y H:i" }}</dd>
+              </dl>
+              <div class="d-flex flex-wrap gap-2 mt-4">
+                <a class="btn btn-primary" href="{% url 'accounts:detail' profile.user.username %}">Переглянути публічний профіль</a>
+                <a class="btn btn-outline-primary" href="{% url 'product_list' %}">До каталогу товарів</a>
+              </div>
+            {% else %}
+              <div class="text-center py-4">
+                <p class="text-muted mb-4">Щоб переглянути персональний профіль, увійдіть до свого облікового запису Biomarket.</p>
+                <a class="btn btn-primary" href="{% url 'home' %}">Повернутися на головну</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
