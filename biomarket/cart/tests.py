@@ -46,6 +46,20 @@ class AddToCartViewTests(TestCase):
         self.assertEqual(cart.items.count(), 1)
         self.assertEqual(cart_item.quantity, 2)
 
+    def test_add_to_cart_does_not_exceed_stock(self):
+        self.product.stock = 2
+        self.product.save(update_fields=["stock"])
+
+        for _ in range(3):
+            response = self.client.post(reverse("cart:add", args=[self.product.slug]))
+            self.assertEqual(response.status_code, 302)
+
+        cart_id = self.client.session["cart_id"]
+        cart = Cart.objects.get(pk=cart_id)
+        cart_item = CartItem.objects.get(cart=cart, product=self.product)
+
+        self.assertEqual(cart_item.quantity, self.product.stock)
+
     def test_guest_cart_items_persist_after_login(self):
         add_response = self.client.post(reverse("cart:add", args=[self.product.slug]))
         self.assertEqual(add_response.status_code, 302)
