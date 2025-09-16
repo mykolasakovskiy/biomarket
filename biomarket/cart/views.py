@@ -40,22 +40,36 @@ def cart_home(request: HttpRequest) -> HttpResponse:
 
 
 def _get_or_create_cart(request: HttpRequest) -> Cart:
-    """Return a cart linked to the current session or create a new one."""
+    """Return the active cart, merging session items into the user's cart if needed."""
 
     cart_id = request.session.get("cart_id")
-    cart = Cart.objects.filter(pk=cart_id).first() if cart_id else None
+    session_cart = Cart.objects.filter(pk=cart_id).first() if cart_id else None
 
     if request.user.is_authenticated:
-        if cart and cart.user_id not in (None, request.user.id):
-            cart = None
-        if cart is None:
-            cart, _created = Cart.objects.get_or_create(user=request.user)
-        elif cart.user_id is None:
-            cart.user = request.user
-            cart.save(update_fields=["user"])
+        cart, _created = Cart.objects.get_or_create(user=request.user)
+
+        if (
+            session_cart
+            and session_cart.pk != cart.pk
+            and session_cart.user_id in (None, request.user.id)
+        ):
+            for item in session_cart.items.all():
+                destination_item, created = CartItem.objects.get_or_create(
+                    cart=cart,
+                    product=item.product,
+                    defaults={"quantity": item.quantity},
+                )
+                if not created:
+                    destination_item.quantity += item.quantity
+                    destination_item.save(update_fields=["quantity"])
+
+            if session_cart.user_id is None:
+                session_cart.delete()
     else:
-        if cart is None:
+        if session_cart is None or session_cart.user_id is not None:
             cart = Cart.objects.create()
+        else:
+            cart = session_cart
 
     request.session["cart_id"] = cart.pk
     return cart
