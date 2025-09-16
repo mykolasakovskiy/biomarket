@@ -53,5 +53,7 @@ urlpatterns = [
         name="contacts",
     ),
     path("products/", include("products.urls")),
+    path("cart/", include("cart.urls")),
+    path("accounts/", include("accounts.urls")),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
 ]
