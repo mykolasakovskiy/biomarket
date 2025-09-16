@@ -1,4 +1,4 @@
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import get_user_model
 
@@ -14,7 +14,11 @@ def profile_overview(request: HttpRequest) -> HttpResponse:
     keywords = "Biomarket, профіль, обліковий запис"
 
     if request.user.is_authenticated:
-        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+        except UserProfile.DoesNotExist as exc:
+            raise Http404("Profile not found") from exc
+
         username = profile.user.get_username()
         meta_title = f"Профіль {username} — Biomarket"
         description = f"Персональна інформація та контактні дані користувача {username} в Biomarket."
@@ -37,7 +41,10 @@ def profile_detail(request: HttpRequest, username: str) -> HttpResponse:
 
     user_model = get_user_model()
     user = get_object_or_404(user_model, username=username)
-    profile, _ = UserProfile.objects.get_or_create(user=user)
+    try:
+        profile = UserProfile.objects.get(user=user)
+    except UserProfile.DoesNotExist as exc:
+        raise Http404("Profile not found") from exc
     is_owner = request.user.is_authenticated and request.user.pk == user.pk
 
     context = {
