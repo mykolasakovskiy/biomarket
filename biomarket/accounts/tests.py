@@ -22,6 +22,23 @@ class ProfileDetailViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(UserProfile.objects.count(), initial_profile_count)
 
+    def test_profile_detail_old_path_redirects(self):
+        user_model = get_user_model()
+        user = user_model.objects.create_user(
+            username="carol",
+            email="carol@example.com",
+            password="example-password",
+        )
+
+        response = self.client.get(f"/accounts/{user.username}/")
+
+        self.assertRedirects(
+            response,
+            reverse("accounts:detail", args=[user.username]),
+            status_code=301,
+            target_status_code=200,
+        )
+
 
 class ProfileOverviewViewTests(TestCase):
     def test_profile_overview_creates_missing_profile(self):
