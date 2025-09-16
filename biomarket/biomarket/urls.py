@@ -53,7 +53,7 @@ urlpatterns = [
         name="contacts",
     ),
     path("products/", include("products.urls", namespace="products")),
-    path("cart/", include("cart.urls")),
-    path("accounts/", include("accounts.urls")),
+    path("cart/", include("cart.urls", namespace="cart")),
+    path("accounts/", include("accounts.urls", namespace="accounts")),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
 ]

@@ -30,7 +30,9 @@ class ProfileDetailViewTests(TestCase):
             password="example-password",
         )
 
-        response = self.client.get(f"/accounts/{user.username}/")
+        response = self.client.get(
+            reverse("accounts:legacy_detail", args=[user.username])
+        )
 
         self.assertRedirects(
             response,

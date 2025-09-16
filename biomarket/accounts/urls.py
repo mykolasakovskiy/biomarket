@@ -11,5 +11,6 @@ urlpatterns = [
     path(
         "<str:username>/",
         RedirectView.as_view(pattern_name="accounts:detail", permanent=True),
+        name="legacy_detail",
     ),
 ]
