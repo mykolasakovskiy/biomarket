@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
 from django.utils.text import Truncator
 
@@ -21,15 +22,30 @@ def product_list(request):
         "Каталог Biomarket: натуральні та органічні товари для здорового життя, "
         "доступні за вигідними цінами."
     )
+    paginator = Paginator(products, 12)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    meta_title = "Каталог товарів Biomarket"
+    if page_obj.number > 1:
+        meta_title = f"Каталог товарів Biomarket – сторінка {page_obj.number}"
+
+    query_params = request.GET.copy()
+    if "page" in query_params:
+        query_params.pop("page")
+    preserved_query = query_params.urlencode()
+
     context = {
-        "products": products,
+        "products": page_obj.object_list,
         "q": query,
         "current_sort": sort if sort in {"price", "name"} else "",
-        "meta_title": "Каталог товарів Biomarket",
+        "meta_title": meta_title,
         "description": description,
         "keywords": "Biomarket, каталог товарів, органічні продукти, еко продукти",
         "og_type": "website",
         "twitter_card": "summary",
+        "page_obj": page_obj,
+        "preserved_query": preserved_query,
     }
     return render(request, "products/list.html", context)
 
