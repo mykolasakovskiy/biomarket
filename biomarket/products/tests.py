@@ -91,7 +91,7 @@ class ProductListViewTests(TestCase):
                 stock=10,
             )
 
-        response = self.client.get(reverse("product_list"))
+        response = self.client.get(reverse("products:product_list"))
         self.assertEqual(response.status_code, 200)
 
         page_obj = response.context["page_obj"]
@@ -99,7 +99,7 @@ class ProductListViewTests(TestCase):
         self.assertEqual(page_obj.number, 1)
         self.assertEqual(len(response.context["products"]), 12)
 
-        second_page = self.client.get(reverse("product_list"), {"page": 2})
+        second_page = self.client.get(reverse("products:product_list"), {"page": 2})
         self.assertEqual(second_page.status_code, 200)
         second_page_obj = second_page.context["page_obj"]
         self.assertEqual(second_page_obj.number, 2)
@@ -125,7 +125,7 @@ class ProductListViewTests(TestCase):
             stock=20,
         )
 
-        response = self.client.get(reverse("product_list"), {"q": "honey"})
+        response = self.client.get(reverse("products:product_list"), {"q": "honey"})
         self.assertEqual(response.status_code, 200)
 
         products = list(response.context["products"])

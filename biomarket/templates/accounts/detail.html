@@ -36,7 +36,7 @@
               <dd class="col-sm-8">{{ profile.created_at|date:"d.m.Y H:i" }}</dd>
             </dl>
             <div class="d-flex flex-wrap gap-2">
-              <a class="btn btn-outline-primary" href="{% url 'product_list' %}">Каталог товарів</a>
+              <a class="btn btn-outline-primary" href="{% url 'products:product_list' %}">Каталог товарів</a>
               {% if is_owner %}
                 <a class="btn btn-primary" href="{% url 'accounts:overview' %}">Повернутися до мого профілю</a>
               {% else %}

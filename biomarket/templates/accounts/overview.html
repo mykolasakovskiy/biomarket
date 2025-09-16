@@ -29,7 +29,7 @@
               </dl>
               <div class="d-flex flex-wrap gap-2 mt-4">
                 <a class="btn btn-primary" href="{% url 'accounts:detail' profile.user.username %}">Переглянути публічний профіль</a>
-                <a class="btn btn-outline-primary" href="{% url 'product_list' %}">До каталогу товарів</a>
+                <a class="btn btn-outline-primary" href="{% url 'products:product_list' %}">До каталогу товарів</a>
               </div>
             {% else %}
               <div class="text-center py-4">
