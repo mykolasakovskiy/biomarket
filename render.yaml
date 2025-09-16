@@ -5,6 +5,10 @@ services:
     buildCommand: cd biomarket && pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: cd biomarket && python manage.py migrate && gunicorn biomarket.wsgi
     envVars:
+      - key: DJANGO_SECRET_KEY
+        sync: false   # задайте значення у налаштуваннях Render
+      - key: ALLOWED_HOSTS
+        sync: false   # напр., example.com або список через кому
       - key: DJANGO_DB_PATH
         value: /var/data/db.sqlite3
     disk:

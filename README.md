@@ -20,7 +20,17 @@ python manage.py migrate
 python manage.py collectstatic
 ```
 
-3. Запустіть сервер розробника:
+3. Перед запуском налаштуйте змінні середовища (наприклад, у файлі `.env` в корені проєкту):
+
+```
+DJANGO_SECRET_KEY=your-secure-secret-key
+ALLOWED_HOSTS=127.0.0.1,localhost
+DEBUG=1
+```
+
+`DJANGO_SECRET_KEY` та `ALLOWED_HOSTS` обов'язково повинні бути визначені у робочому середовищі (напр., через Render, Docker або хмарну платформу).
+
+4. Запустіть сервер розробника:
 
 ```bash
 python manage.py runserver
