@@ -30,6 +30,16 @@ DEBUG=1
 
 `DJANGO_SECRET_KEY` та `ALLOWED_HOSTS` обов'язково повинні бути визначені у робочому середовищі (напр., через Render, Docker або хмарну платформу).
 
+## Деплой на Render
+
+- Використайте `render.yaml`, щоб створити сервіс типу **Web Service**.
+- У налаштуваннях середовища задайте змінні:
+  - `DJANGO_SECRET_KEY` — секретний ключ Django.
+  - `ALLOWED_HOSTS` — дозволені домени, розділені комами.
+  - `DB_NAME` — шлях до файлу бази даних (за умовчанням `/var/data/db.sqlite3`).
+
+`DB_NAME` відповідає значенню, яке читає `biomarket/biomarket/settings.py` для параметра `DATABASES['default']['NAME']`.
+
 4. Запустіть сервер розробника:
 
 ```bash
